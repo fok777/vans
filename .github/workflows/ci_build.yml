@@ -1,8 +1,8 @@
-name: CI Build
+name: CI Build (Android 13 / a13_eol)
 
 on:
   push:
-    branches: [main]
+    branches: [a13]
   workflow_dispatch:
 
 jobs:
@@ -19,19 +19,15 @@ jobs:
         uses: actions/setup-java@v5
         with:
           distribution: 'temurin'
-          java-version: '25'
+          java-version: '21'
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v6
         with:
-          # HyperCeiler-Android13-Backport: 仓库自带 wrapper jar 不在 action 已知校验列表内
           validate-wrappers: false
           cache-overwrite-existing: true
 
       - name: Build with Gradle (Debug)
-        env:
-          GIT_ACTOR: ${{ secrets.GIT_ACTOR }}
-          GIT_TOKEN: ${{ secrets.GIT_TOKEN }}
         shell: bash
         run: |
           ./gradlew assembleDebug --stacktrace
