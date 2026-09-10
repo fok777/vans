@@ -21,7 +21,14 @@ val gitBranch: String by lazy {
     val branch = runGitCommand("branch", "--show-current") ?: "unknown"
     """github\.com[:/](.+?)(\.git)?$""".toRegex().find(url)?.groupValues?.get(1).orEmpty() + "/" + branch
 }
-val gitVersionCode: Int by lazy { 5 + gitCommitCount }
+// HyperCeiler-Android13-Backport:
+// 官方 2.10.166 的 versionCode 是 4571（Xposed 模块仓库 tag: 4571-2.10.166）。
+// 本仓库是 fork，git 提交数只有几十，算出来的 versionCode 远低于官方，
+// 于是 LSPosed 按包名匹配仓库后一直提示「需要更新」—— 但官方新版要求
+// Android 15+（minSdk 35），在 Android 13 上根本装不上，点了也白点。
+// 这里给 versionCode 设下限，消除误报。纯版本号，不影响任何功能。
+private const val MIN_VERSION_CODE = 99999
+val gitVersionCode: Int by lazy { maxOf(5 + gitCommitCount, MIN_VERSION_CODE) }
 
 fun runGitCommand(vararg args: String): String? = runCatching {
     ProcessBuilder(listOf("git") + args)
