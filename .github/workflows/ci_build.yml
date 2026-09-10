@@ -78,3 +78,17 @@ jobs:
             lint.log
           if-no-files-found: warn
           compression-level: 9
+
+      # Artifact downloads are not readable from outside; commit the report back
+      # so it can be fetched via the contents API. [skip ci] prevents a loop.
+      - name: Commit lint audit to repo
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          mkdir -p ci-logs
+          cp lint-api-audit.txt ci-logs/lint-api-audit.txt 2>/dev/null || echo "no audit" > ci-logs/lint-api-audit.txt
+          git add ci-logs/lint-api-audit.txt
+          git commit -m "ci: lint api audit [skip ci]" || echo "no change"
+          git pull --rebase origin main
+          git push origin HEAD:main
