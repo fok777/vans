@@ -7,6 +7,7 @@ on:
 
 jobs:
   build_app:
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
     runs-on: macos-latest
     name: Build App
     steps:
@@ -28,28 +29,35 @@ jobs:
           cache-overwrite-existing: true
 
       - name: Build with Gradle (Debug)
+        id: gradle
         shell: bash
         run: |
-          ./gradlew assembleDebug --stacktrace
+          ./gradlew assembleDebug --stacktrace > build.log 2>&1
+          tail -200 build.log > ci-tail.log
 
       - name: Find APKs
+        if: success()
         run: |
           APK_FILE=$(find app/build/outputs/apk/debug -name '*.apk' | head -1)
           echo "APK_FILE=$APK_FILE" >> $GITHUB_ENV
           echo "APK_FILE_NAME=$(basename $APK_FILE .apk)" >> $GITHUB_ENV
 
-      - name: Show APKs SHA256
-        if: success()
-        run: |
-          echo "### Build Success" >> $GITHUB_STEP_SUMMARY
-          echo "|Artifact|SHA256|" >> $GITHUB_STEP_SUMMARY
-          echo "|:---:|:---|" >> $GITHUB_STEP_SUMMARY
-          APK_SHA256=($(shasum -a 256 ${{ env.APK_FILE }}))
-          echo "|Debug|$APK_SHA256" >> $GITHUB_STEP_SUMMARY
-
       - name: Upload APKs
+        if: success()
         uses: actions/upload-artifact@v7
         with:
           name: ${{ env.APK_FILE_NAME }}
           path: ${{ env.APK_FILE }}
           compression-level: 9
+
+      - name: Push build log back to repo
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          mkdir -p ci-logs
+          cp ci-tail.log ci-logs/build-tail.log 2>/dev/null || echo "no log" > ci-logs/build-tail.log
+          git add ci-logs/build-tail.log
+          git commit -m "ci: build log [skip ci]" || echo "no change"
+          git pull --rebase origin a13
+          git push origin HEAD:a13
