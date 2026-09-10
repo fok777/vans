@@ -79,16 +79,13 @@ jobs:
           if-no-files-found: warn
           compression-level: 9
 
-      # Artifact downloads are not readable from outside; commit the report back
-      # so it can be fetched via the contents API. [skip ci] prevents a loop.
-      - name: Commit lint audit to repo
+      # HyperCeiler-Android13-Backport:
+      # 把审计报告直接写进 Job Summary，这样不用回推仓库（回推会和并发 push 抢锁而失败），
+      # 也不会再触发新一轮构建。
+      - name: Print lint audit to summary
         if: always()
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          mkdir -p ci-logs
-          cp lint-api-audit.txt ci-logs/lint-api-audit.txt 2>/dev/null || echo "no audit" > ci-logs/lint-api-audit.txt
-          git add ci-logs/lint-api-audit.txt
-          git commit -m "ci: lint api audit [skip ci]" || echo "no change"
-          git pull --rebase origin main
-          git push origin HEAD:main
+          echo "## Lint API audit (minSdk 33)" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          head -100 lint-api-audit.txt 2>/dev/null >> $GITHUB_STEP_SUMMARY || echo "no audit output" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
