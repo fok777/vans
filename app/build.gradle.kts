@@ -27,8 +27,7 @@ val gitBranch: String by lazy {
 // 于是 LSPosed 按包名匹配仓库后一直提示「需要更新」—— 但官方新版要求
 // Android 15+（minSdk 35），在 Android 13 上根本装不上，点了也白点。
 // 这里给 versionCode 设下限，消除误报。纯版本号，不影响任何功能。
-private const val MIN_VERSION_CODE = 99999
-val gitVersionCode: Int by lazy { maxOf(5 + gitCommitCount, MIN_VERSION_CODE) }
+val gitVersionCode: Int by lazy { maxOf(5 + gitCommitCount, 99999) }
 
 fun runGitCommand(vararg args: String): String? = runCatching {
     ProcessBuilder(listOf("git") + args)
