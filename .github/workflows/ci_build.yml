@@ -5,6 +5,10 @@ on:
     branches: [a13]
   workflow_dispatch:
 
+# GITHUB_TOKEN 默认是 read-only，不显式声明则 ci 里的 git push 会失败
+permissions:
+  contents: write
+
 jobs:
   build_app:
     runs-on: macos-latest
