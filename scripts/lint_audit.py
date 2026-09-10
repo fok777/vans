@@ -22,17 +22,32 @@ INTERESTING = {
 
 reports = sorted(glob.glob("**/lint-results*.xml", recursive=True))
 
-if not reports:
-    msg = "No lint XML reports found - lint likely failed before writing output."
-    print(msg)
-    if os.path.exists("lint.log"):
-        tail = open("lint.log", encoding="utf-8", errors="ignore").read()[-3000:]
-        print("--- lint.log tail ---")
-        print(tail)
-    sys.exit(0)
-
 found = defaultdict(list)
 counts = Counter()
+
+if not reports:
+    lines = [
+        "### Android 13 backport - lint API audit",
+        "",
+        "**No lint XML reports found** - lintDebug likely failed before writing output.",
+        "",
+    ]
+    if os.path.exists("lint.log"):
+        tail = open("lint.log", encoding="utf-8", errors="ignore").read()[-4000:]
+        lines.append("#### lint.log tail")
+        lines.append("")
+        lines.append("```")
+        lines.extend(tail.splitlines())
+        lines.append("```")
+    text = "\n".join(lines)
+    print(text)
+    out = os.environ.get("GITHUB_STEP_SUMMARY")
+    if out:
+        with open(out, "a", encoding="utf-8") as fh:
+            fh.write(text + "\n")
+    with open("lint-api-audit.txt", "w", encoding="utf-8") as fh:
+        fh.write(text + "\n")
+    sys.exit(0)
 
 for path in reports:
     try:
