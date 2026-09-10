@@ -56,6 +56,8 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v6
         with:
+          # HyperCeiler-Android13-Backport: 仓库自带的 wrapper jar 版本不在 action 的已知校验列表内
+          validate-wrappers: false
           cache-overwrite-existing: true
 
       - name: Create Sign File
