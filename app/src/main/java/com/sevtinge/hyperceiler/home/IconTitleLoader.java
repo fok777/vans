@@ -15,6 +15,7 @@ import com.sevtinge.hyperceiler.utils.ThreadUtils;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -87,7 +88,8 @@ public class IconTitleLoader {
         List<String> toLoad = packageNames.stream()
             .filter(pkg -> pkg != null && (sLabelCache.get(buildLabelCacheKey(pkg, localeTag)) == null
                 || AppIconCache.getCached(appContext, pkg, iconSizePx) == null))
-            .toList();
+            .collect(Collectors.toList());
+
 
         if (toLoad.isEmpty()) {
             onComplete.run();

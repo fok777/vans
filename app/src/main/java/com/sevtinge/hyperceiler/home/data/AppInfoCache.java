@@ -24,6 +24,7 @@ import android.content.pm.PackageManager;
 import android.util.LruCache;
 
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -114,7 +115,7 @@ public class AppInfoCache {
      * 获取所有缓存的应用信息
      */
     public List<ApplicationInfo> getAllCachedAppInfos() {
-        return mAppInfoCache.snapshot().values().stream().toList();
+        return mAppInfoCache.snapshot().values().stream().collect(Collectors.toList());
     }
 
     /**

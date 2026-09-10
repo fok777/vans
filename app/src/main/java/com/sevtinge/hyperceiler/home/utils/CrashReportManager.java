@@ -10,6 +10,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.StringJoiner;
+import java.util.stream.Collectors;
 
 public class CrashReportManager {
     private static final Map<String, Integer> NAME_MAP = Map.of(
@@ -22,7 +23,7 @@ public class CrashReportManager {
     public static List<String> getCrashList() {
         try {
             List<?> raw = CrashScope.getCrashingPackages();
-            return raw.stream().map(Object::toString).toList();
+            return raw.stream().map(Object::toString).collect(Collectors.toList());
         } catch (Exception e) {
             return Collections.emptyList();
         }

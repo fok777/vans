@@ -24,6 +24,7 @@ import com.sevtinge.hyperceiler.libhook.base.BaseHook;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class DisableFolderCantUse extends BaseHook {
 
@@ -34,7 +35,7 @@ public class DisableFolderCantUse extends BaseHook {
         Class<?> externalStorageProvider = findClass("com.android.externalstorage.ExternalStorageProvider");
         List<Method> methodList = Arrays.stream(externalStorageProvider.getDeclaredMethods())
                 .filter(method -> METHOD_NAME_LIST.contains(method.getName()))
-                .filter(method -> method.getReturnType() == boolean.class).toList();
+                .filter(method -> method.getReturnType() == boolean.class).collect(Collectors.toList());
 
         if (methodList.isEmpty()) {
             XposedLog.e(TAG, getPackageName(), new NoSuchMethodException("shouldBlockFromTree"));
