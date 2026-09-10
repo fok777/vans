@@ -179,7 +179,10 @@ public class HomePageBannerManager {
     }
 
     private static BannerBean createWarningBannerIfNeeded(Context context) {
-        if (!SignUtils.isSignCheckPass(context)) {
+        // HyperCeiler-Android13-Backport:
+        // 官方签名校验只在 release 构建下有意义。社区自建的 debug/canary 必然用本地 keystore，
+        // "签名校验失败" 是必然结果而非异常，显示出来只会误导。官方 release 不受影响。
+        if (isRelease() && !SignUtils.isSignCheckPass(context)) {
             return createWarningBanner(
                 "warning_sign",
                 context.getString(R.string.headtip_warn_sign_verification_failed),
@@ -335,7 +338,10 @@ public class HomePageBannerManager {
     }
 
     private static boolean isLoggerAlive() {
-        if (isRelease()) return false;
+        // HyperCeiler-Android13-Backport:
+        // 与 LogServiceUtils 同理，社区自建构建直接跳过日志服务横幅。
+        // 该方法返回 true 表示「健康状态异常、需要展示警告」。
+        if (!isRelease()) return false;
         if ("NOT_CHECKED".equals(LoggerHealthChecker.diagSummary)) return false;
         return !IS_LOGGER_ALIVE;
     }

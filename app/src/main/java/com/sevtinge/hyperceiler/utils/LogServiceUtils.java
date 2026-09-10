@@ -42,7 +42,13 @@ public class LogServiceUtils {
     }
 
     private static boolean shouldShowLogServiceWarn() {
-        return !LogStatusManager.IS_LOGGER_ALIVE && isModuleActivated && !isRelease() &&
+        // HyperCeiler-Android13-Backport:
+        // 原逻辑为 !isRelease()，即 debug/canary 才弹。但社区自建构建基本都是 debug，
+        // 而 Android 13 上 logcat 管道检查常读不到自身标记（15% 属误报），
+        // 每次启动都弹会干扰使用。这里改为仅 release 构建提示，
+        // 该功能不影响任何 hook（IS_LOGGER_ALIVE 只用于 UI 展示与日志采集）。
+        if (!isRelease()) return false;
+        return !LogStatusManager.IS_LOGGER_ALIVE && isModuleActivated &&
             !PrefsBridge.getBoolean("prefs_key_development_close_log_alert_dialog", false);
     }
 }

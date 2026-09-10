@@ -57,3 +57,22 @@ jobs:
           name: ${{ env.APK_FILE_NAME }}
           path: ${{ env.APK_FILE }}
           compression-level: 9
+
+      # HyperCeiler-Android13-Backport:
+      # minSdk 由 35 降到 33，凡是调用 Android 34/35+ 框架 API 的地方都会在运行时抛
+      # NoSuchMethodError（Stream.toList() 就是一例）。这里跑 lint 把剩余问题报出来。
+      - name: Lint API audit (minSdk 33 backport)
+        continue-on-error: true
+        run: |
+          ./gradlew lintDebug --stacktrace > lint.log 2>&1
+          echo "gradlew exit: $?"
+          python3 scripts/lint_audit.py || true
+
+      - name: Upload lint audit
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: lint-api-audit
+          path: lint-api-audit.txt
+          if-no-files-found: ignore
+          compression-level: 9
