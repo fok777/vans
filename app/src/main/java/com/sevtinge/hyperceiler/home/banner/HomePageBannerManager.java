@@ -203,7 +203,11 @@ public class HomePageBannerManager {
                 BannerCallback.ACTION_OPEN_FRAMEWORK_WARNING_HELP
             );
         }
-        if (getSupportStatus() != SUPPORT_FULL) {
+        // HyperCeiler-Android13-Backport:
+        // 回移植构建跑在官方已停止维护的系统上（Android 13/14），getSupportStatus()
+        // 必然返回非 SUPPORT_FULL，这个横幅会永久常驻。使用者本就知道自己在用
+        // 社区回移植版本，这里按 release 构建保留、自建构建隐藏，减少无意义噪音。
+        if (isRelease() && getSupportStatus() != SUPPORT_FULL) {
             return createWarningBanner(
                 "warning_sysver",
                 context.getString(R.string.headtip_warn_unsupport_sysver),
